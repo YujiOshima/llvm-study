@@ -1,5 +1,7 @@
 import lexer
 import ast
+import sys
+
 class Parser(object):
     def parse(self, token_lists):
         statement_list = []
@@ -13,8 +15,6 @@ class Parser(object):
             return ast.NUMBER_AST(token)
         elif token.type == lexer.ID:
             return ast.VARIABLE_AST(token)
-        else:
-            return None
 
     def parse_statement(self, token_list):
         statement=ast.STATEMENT_AST()
@@ -36,4 +36,5 @@ class Parser(object):
                             token_list[2],
                             ),
                         )
+
         return statement

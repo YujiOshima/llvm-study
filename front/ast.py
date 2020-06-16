@@ -13,8 +13,10 @@ DIGIT  = ["0","1","2","3","4","5","6","7","8","9"]
 class BASE_AST(object):
     def __init__(self, ast_type):
         self.type=ast_type
-    def get_ast_type():
+    def get_ast_type(self):
         return self.type
+    def get_childs(self):
+        return []
 
 class STATEMENT_AST(BASE_AST):
     def __init__(self):
@@ -23,6 +25,8 @@ class STATEMENT_AST(BASE_AST):
 
     def __repr__(self):
         return "type {} statement ({})".format(TYPE_STATEMENT, self.statement)
+    def get_childs(self):
+        return [self.statement]
 
 class ASSIGNMENT_AST(BASE_AST):
     def __init__(self, left, right):
@@ -35,6 +39,8 @@ class ASSIGNMENT_AST(BASE_AST):
                 self.left,
                 self.right,
                 )
+    def get_childs(self):
+        return [self.left, self.right]
 
 class BINARY_EXPR_AST(BASE_AST):
     def __init__(self, op, left, right):
@@ -49,6 +55,8 @@ class BINARY_EXPR_AST(BASE_AST):
                 self.left,
                 self.right,
                 )
+    def get_childs(self):
+        return [self.left, self.right]
 
 class PRINT_AST(BASE_AST):
     def __init__(self, args):
@@ -59,6 +67,8 @@ class PRINT_AST(BASE_AST):
                 TYPE_PRINT,
                 self.args,
                 )
+    def get_childs(self):
+        return [self.args]
 
 class NUMBER_AST(BASE_AST):
     def __init__(self, val):
