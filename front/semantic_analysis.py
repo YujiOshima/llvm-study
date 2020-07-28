@@ -7,7 +7,7 @@ class SemanticAnalyzer(object):
 
     def check_declear(self, statement):
         if statement.get_ast_type == ast.TYPE_ASSIGMENT:
-            self.variable_table.append(statement.left.value)
+            self.variable_table.append(statement.left)
         elif statement.get_ast_type == ast.TYPE_VARIABLE:
             if statement.val not in self.variable_table:
                 print("parse error")

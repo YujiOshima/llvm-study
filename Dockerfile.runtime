@@ -1,0 +1,5 @@
+FROM gcr.io/professor-x-dev/oshima/llvm-dev
+ADD ./front /front
+WORKDIR /front
+RUN llc main.ll -mtriple=x86_64-linux-gnu
+RUN clang main.s -o run_main

@@ -73,19 +73,19 @@ class PRINT_AST(BASE_AST):
 class NUMBER_AST(BASE_AST):
     def __init__(self, val):
         super().__init__(TYPE_NUMBER)
-        self.val=val
+        self.token=val
     def __repr__(self):
-        return "type {} value ({})".format(
+        return "type {} token ({})".format(
                 TYPE_NUMBER,
-                self.val,
+                self.token,
                 )
 
 class VARIABLE_AST(BASE_AST):
     def __init__(self, val):
         super().__init__(TYPE_VARIABLE)
-        self.val=val
+        self.token=val
     def __repr__(self):
-        return "type {} value ({})".format(
+        return "type {} token ({})".format(
                 TYPE_VARIABLE,
-                self.val,
+                self.token,
                 )

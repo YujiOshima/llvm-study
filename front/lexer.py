@@ -48,6 +48,8 @@ class LEXER(object):
                         ttype=ID
                         cur_token+=lc
                         begin=False
+                if ttype==DIGIT:
+                    cur_token = int(cur_token)
                 appendToken(ttype, cur_token, t_lists[-1])
         print(t_lists)
         return t_lists

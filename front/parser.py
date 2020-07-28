@@ -29,7 +29,7 @@ class Parser(object):
             statement.statement = ast.PRINT_AST(arg)
         elif token_list[0].type == lexer.ID and len(token_list) == 3:
             statement.statement = ast.ASSIGNMENT_AST(
-                        ast.VARIABLE_AST(
+                        self.ret_dig_or_val(
                             token_list[0],
                             ),
                         self.ret_dig_or_val(
