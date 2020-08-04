@@ -2,6 +2,7 @@ import lexer
 import ast
 import sys
 
+
 class Parser(object):
     def parse(self, token_lists):
         statement_list = []
@@ -17,9 +18,9 @@ class Parser(object):
             return ast.VARIABLE_AST(token)
 
     def parse_statement(self, token_list):
-        statement=ast.STATEMENT_AST()
+        statement = ast.STATEMENT_AST()
         if token_list[0].type == lexer.PRINT:
-            arg=None
+            arg = None
             if len(token_list) == 2:
                 arg = self.ret_dig_or_val(token_list[1])
             elif len(token_list) == 4:
@@ -27,14 +28,24 @@ class Parser(object):
                 arg_right = self.ret_dig_or_val(token_list[3])
                 arg = ast.BINARY_EXPR_AST(token_list[2], arg_left, arg_right)
             statement.statement = ast.PRINT_AST(arg)
-        elif token_list[0].type == lexer.ID and len(token_list) == 3:
+        elif token_list[0].type == lexer.ID and len(token_list) == 3 and token_list[1].value == "=":
             statement.statement = ast.ASSIGNMENT_AST(
-                        self.ret_dig_or_val(
-                            token_list[0],
-                            ),
-                        self.ret_dig_or_val(
-                            token_list[2],
-                            ),
-                        )
+                self.ret_dig_or_val(
+                    token_list[0],
+                ),
+                self.ret_dig_or_val(
+                    token_list[2],
+                ),
+            )
+        elif token_list[0].type == lexer.ID and len(token_list) == 5 and token_list[1].value == "=":
+            b_arg_left = self.ret_dig_or_val(token_list[2])
+            b_arg_right = self.ret_dig_or_val(token_list[4])
+            arg = ast.BINARY_EXPR_AST(token_list[3], b_arg_left, b_arg_right)
+            statement.statement = ast.ASSIGNMENT_AST(
+                self.ret_dig_or_val(
+                    token_list[0],
+                ),
+                arg,
+            )
 
         return statement

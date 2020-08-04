@@ -1,6 +1,8 @@
 FROM gcr.io/professor-x-dev/oshima/llvm-dev
 ADD ./front /front
 WORKDIR /front
-RUN llc main.ll -mtriple=x86_64-linux-gnu
-RUN clang main.s -o run_main
+RUN clang -emit-llvm -S -O -o printnum.ll printnum.c
+RUN llvm-link main.ll printnum.ll -S -o main_linked.ll
+RUN llc main_linked.ll -mtriple=x86_64-linux-gnu
+RUN clang main_linked.s -o run_main
 RUN llc main.ll -mtriple=x86_64-apple-darwin

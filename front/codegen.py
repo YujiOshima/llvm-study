@@ -5,17 +5,18 @@ import llvmlite.binding as llvm
 import ast
 import lexer
 
+
 class CodeGen:
     def __init__(self):
         llvm.initialize()
         llvm.initialize_native_target()
         llvm.initialize_native_asmprinter()
         self.builder = ll.IRBuilder()
-        self.variable_table={}
+        self.variable_table = {}
         fntype = ll.FunctionType(ll.VoidType(), [])
         self.module = ll.Module()
         self.func = ll.Function(self.module, fntype, name='main')
-       
+
     def generate_Statements(self, statement_list):
         bb_entry = self.func.append_basic_block()
         self.builder.position_at_end(bb_entry)
@@ -32,25 +33,27 @@ class CodeGen:
     def generate_Statement(self, statement):
         print(statement)
         if statement.get_ast_type() == ast.TYPE_STATEMENT:
-            for s in statement.get_childs():
+            for s in statement.get_children():
                 self.generate_Statement(s)
 
-        elif statement.get_ast_type() == ast.TYPE_ASSIGMENT:
+        elif statement.get_ast_type() == ast.TYPE_ASSIGNMENT:
             self.generate_assignment(statement)
         elif statement.get_ast_type() == ast.TYPE_PRINT:
             self.generate_print(statement)
 
     def generate_assignment(self, statement):
         ptr = self.builder.alloca(ll.IntType(32))
-        if statement.right.type == ast.TYPE_NUMBER:
+        if statement.right.get_ast_type() == ast.TYPE_NUMBER:
             self.builder.store(self.generate_number(statement.right), ptr)
-        elif statement.right.type == ast.TYPE_VARIABLE:
+        elif statement.right.get_ast_type() == ast.TYPE_VARIABLE:
             self.builder.store(self.generate_variable(statement.right), ptr)
-        self.variable_table[statement.left.token.value]=ptr
+        elif statement.right.get_ast_type() == ast.TYPE_BINARY:
+            self.builder.store(self.generate_binaryexpr(statement.right), ptr)
+        self.variable_table[statement.left.token.value] = ptr
         return
 
     def generate_binaryexpr(self, statement):
-        childs = statement.get_childs()
+        childs = statement.get_children()
         childs_ptr = []
         for c in childs:
             if c.type == ast.TYPE_NUMBER:
@@ -67,31 +70,27 @@ class CodeGen:
     def generate_print(self, statement):
         fmt = "%d\n\0"
         try:
-            printf = self.module.get_global('printf')
+            printf = self.module.get_global('printnum')
         except KeyError:
-            voidptr_ty = ll.IntType(8).as_pointer()
-            c_fmt = ll.Constant(ll.ArrayType(ll.IntType(8), len(fmt)),
-                                bytearray(fmt.encode("utf8")))
-            global_fmt = ll.GlobalVariable(self.module, c_fmt.type, name="fstr")
-            global_fmt.linkage = 'internal'
-            global_fmt.global_constant = True
-            global_fmt.initializer = c_fmt
-            printf_ty = ll.FunctionType(ll.IntType(32), [voidptr_ty], var_arg=True)
-            printf = ll.Function(self.module, printf_ty, name="printf")
-            self.fmt_arg = self.builder.bitcast(global_fmt, voidptr_ty)
-       
-        #print(".args.token.type: {}".format(.args.token.type))
-        if statement.args.get_ast_type() == ast.TYPE_BINAEY:
+            ty = ll.IntType(32)
+            printf_ty = ll.FunctionType(
+                ll.IntType(32), [ty], var_arg=True)
+            printf = ll.Function(self.module, printf_ty, name="printnum")
+
+        # print(".args.token.type: {}".format(.args.token.type))
+        if statement.args.get_ast_type() == ast.TYPE_BINARY:
             p_value = self.generate_binaryexpr(statement.args)
         else:
             if statement.args.token.type == lexer.ID:
                 p_value = self.generate_variable(statement.args)
 
             elif statement.args.token.type == lexer.DIGIT:
-                p_value=ll.Constant(ll.IntType(32), statement.args.token.value)
+                p_value = ll.Constant(ll.IntType(
+                    32), statement.args.token.value)
 
         #print("print {}".format(arg))
-        self.builder.call(printf, [self.fmt_arg, p_value])
+        #self.builder.call(printf, [self.fmt_arg, p_value])
+        self.builder.call(printf, [p_value])
         return
 
     def generate_number(self, statement):
